@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-import { v4 as generateId } from 'uuid'; // package for generating note ids
+const { v4: uuidv4 } = require('uuid'); // package for generating note ids
 
 const PORT = process.env.PORT || 3001;
 
@@ -37,7 +37,7 @@ app.post('api/notes', (req, res) => {
     const note = {
       title: title,
       text: text,
-      id: generateId()
+      id: uuidv4()
     }
     // read db file so we can turn it into an array to have items pushed to
     fs.readFile('./db/db.json', 'utf-8', (err, data) => {
