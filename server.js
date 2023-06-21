@@ -19,19 +19,25 @@ app.get('/notes', (req, res) => {
 
 // retrieve notes
 app.get('/api/notes', (req, res) => {
-  fs.readFile('./db/db.json', 'utf-8', (response) => {
-    res.json(JSON.parse(response));
+  fs.readFile('./db/db.json', 'utf-8', (err, response) => {
+    if (err) {
+      console.error(err);
+      return;
+    } else {
+      res.json(JSON.parse(response));
+    }
   });
 });
 
 // handle receiving of new note and saving it to db
-app.post('api/notes', (req, res) => {
+app.post('/api/notes', (req, res) => {
   // save req title and text into variables and trim whitespace
   const title = req.body.title.trim();
   const text = req.body.text.trim();
 
   if (!title || !text) { // handles empty inputs
     console.error("Title or text cannot be empty.");
+    return;
   } else {
     // new note created
     const note = {
@@ -59,9 +65,35 @@ app.post('api/notes', (req, res) => {
         } else {
           console.log('New note successfully added.');
         }
-      })
+      });
     });
+    res.json(note);
   }
+});
+
+app.delete('/api/notes/:id', (req, res) => {
+  const noteId = req.params.id;
+
+  fs.readFile('./db/db.json', 'utf-8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    } 
+
+    const jsonArray = JSON.parse(data);
+    const filteredArray = jsonArray.filter(note => note.id !== noteId);
+    const newDb = JSON.stringify(filteredArray);
+    
+
+    fs.writeFile('./db/db.json', newDb, 'utf-8', (err) => {
+      if (err) {
+        console.error(err);
+        return;
+      } else {
+        res.send("Note deleted");
+      }
+    });
+  });
 });
 
 // fallback path for paths that dont exist
